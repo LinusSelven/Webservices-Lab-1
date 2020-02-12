@@ -187,6 +187,8 @@ public class JavaHTTPServer implements Runnable{
             return "application/pdf";
         if(fileRequested.endsWith(".css"))
             return "text/css";
+        if(fileRequested.endsWith(".png"))
+            return "image/png";
         else
             return "text/plain";
     }
