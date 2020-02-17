@@ -72,6 +72,14 @@ public class JavaHTTPServer implements Runnable{
             // get binary output stream to client (for requested data)
             dataOut = new BufferedOutputStream(connect.getOutputStream());
 
+
+
+            HTTPRequest theRequest = new HTTPRequest();
+            ParseRequest parseRequest = new ParseRequest();
+
+            String result = parseRequest.parse(theRequest, in);
+            System.out.println(result);
+
             // get first line of the request from the client
             String input = in.readLine();
             // we parse the request with a string tokenizer
@@ -79,6 +87,8 @@ public class JavaHTTPServer implements Runnable{
             String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
             // we get file requested
             fileRequested = parse.nextToken().toLowerCase();
+
+
 
             // we support only GET and HEAD methods, we check
             if (!method.equals("GET")  &&  !method.equals("HEAD")) {
@@ -185,6 +195,8 @@ public class JavaHTTPServer implements Runnable{
             return "text/html";
         if (fileRequested.endsWith(".pdf"))
             return "application/pdf";
+        if(fileRequested.endsWith(".json"))
+            return "application/json";
         if(fileRequested.endsWith(".css"))
             return "text/css";
         if(fileRequested.endsWith(".png"))
