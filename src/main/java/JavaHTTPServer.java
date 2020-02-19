@@ -61,7 +61,9 @@ public class JavaHTTPServer implements Runnable{
     @Override
     public void run() {
         // we manage our particular client connection
-        BufferedReader in = null; PrintWriter out = null; BufferedOutputStream dataOut = null;
+        BufferedReader in = null;
+        PrintWriter out = null;
+        BufferedOutputStream dataOut = null;
         String fileRequested = null;
 
         try {
@@ -77,8 +79,9 @@ public class JavaHTTPServer implements Runnable{
             HTTPRequest theRequest = new HTTPRequest();
             ParseRequest parseRequest = new ParseRequest();
 
-            String result = parseRequest.parse(theRequest, in);
-            System.out.println(result);
+
+
+
 
             // get first line of the request from the client
             String input = in.readLine();
@@ -88,6 +91,26 @@ public class JavaHTTPServer implements Runnable{
             // we get file requested
             fileRequested = parse.nextToken().toLowerCase();
 
+
+            if(method.equals("POST")){
+
+                File file = new File(WEB_ROOT, METHOD_NOT_SUPPORTED);
+                int fileLength = (int) file.length();
+                //read content to return to client
+                byte[] fileData = readFileData(file, fileLength);
+
+                String result = parseRequest.parse(theRequest, in);
+                System.out.println(result);
+                out.println("HTTP/1.1 200 OK");
+                out.println("Server: Java HTTP Server from SSaurel : 1.0");
+                out.println("Date: " + new Date());
+                out.println("Content-type: " + "text/plain");
+                out.println("Content-length: " + result.length());
+                out.println(); // blank line between headers and content, very important !
+                out.println(result);
+                out.flush(); // flush character output stream buffer
+
+            }
 
 
             // we support only GET and HEAD methods, we check
