@@ -34,7 +34,7 @@ public class ParseRequest {
                 char[] sizeByContentLenght = new char[contentLength];
                 in.read(sizeByContentLenght, 0 ,contentLength);
                 String jsonBody = new String(sizeByContentLenght);  try {
-                    Pattern regex = Pattern.compile("(^|\\s+)name=(.*?)&age=(.*?)(\\s+|$)");
+                    Pattern regex = Pattern.compile("(^|\\s+)name=(.*?)&age=(.*?)(\\s+|$)", Pattern.CASE_INSENSITIVE);
                     Matcher regexMatcher = regex.matcher(jsonBody);
 
                     if(regexMatcher.matches()){
@@ -52,9 +52,9 @@ public class ParseRequest {
                 } catch (PatternSyntaxException ex) {
                     //TODO: Handle it.
                 }
-               return null;
+               return new JSONObject();
 
             }
-            return null;
+            return new JSONObject();
     }
 }
