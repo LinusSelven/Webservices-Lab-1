@@ -1,5 +1,6 @@
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,13 +10,13 @@ import java.util.regex.PatternSyntaxException;
 
 public class ParseRequest {
 
-    public String parse(HTTPRequest httpRequest, BufferedReader in) throws IOException {
+    public JSONObject parse(HTTPRequest httpRequest, BufferedReader in) throws IOException {
         System.out.println("Parsing ---------------------");
         // Get starline
         String[] splitHead = in.readLine().split(" ");
         httpRequest.setStartLineImplementation(splitHead[0].toUpperCase());
-        httpRequest.setStartLineURL(splitHead[1]);
-        httpRequest.setStartLineStatus(splitHead[2]);
+        httpRequest.setStartLineURL(splitHead[0]);
+        httpRequest.setStartLineStatus(splitHead[1]);
 
         // Get headers
         String headerLine  = " ";
@@ -27,9 +28,8 @@ public class ParseRequest {
         }
 
         // Get POST body
-        if (httpRequest.StartLineImplementation.equals("POST") || httpRequest.StartLineImplementation.equals("PUT") ) {
 
-            if(httpRequest.getHeaders().get("Content-Type").replace(" ", "").equals("application/x-www-form-urlencoded")){
+            if(httpRequest.getHeaders().containsValue(" application/x-www-form-urlencoded")){
                 int contentLength = Integer.parseInt((httpRequest.getHeaders().get("Content-Length")).replace(" ", ""));
                 char[] sizeByContentLenght = new char[contentLength];
                 in.read(sizeByContentLenght, 0 ,contentLength);
@@ -43,16 +43,18 @@ public class ParseRequest {
                         final String ageValue = regexMatcher.group(3);
 
 
-                        return "{\"name\": \""+nameValue+"\", \"age\": \""+ageValue+"\"}";
+
+
+                        String jsonString = "{\"name\": \""+nameValue+"\", \"age\": \""+ageValue+"\"}";
+                        return new JSONObject(jsonString);
                     }
 
                 } catch (PatternSyntaxException ex) {
                     //TODO: Handle it.
                 }
-                return "{\"name\": \"\", \"age\": \"\"}";
+               return null;
 
             }
-        }
-        return "Error!!!!!!!!";
+            return null;
     }
 }

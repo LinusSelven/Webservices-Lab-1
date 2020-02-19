@@ -1,4 +1,6 @@
 
+import org.json.JSONObject;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -76,8 +78,7 @@ public class JavaHTTPServer implements Runnable{
 
 
 
-            HTTPRequest theRequest = new HTTPRequest();
-            ParseRequest parseRequest = new ParseRequest();
+
 
 
 
@@ -93,23 +94,23 @@ public class JavaHTTPServer implements Runnable{
 
 
             if(method.equals("POST")){
-
-                File file = new File(WEB_ROOT, METHOD_NOT_SUPPORTED);
-                int fileLength = (int) file.length();
                 //read content to return to client
-                byte[] fileData = readFileData(file, fileLength);
+                HTTPRequest theRequest = new HTTPRequest();
+                ParseRequest parseRequest = new ParseRequest();
 
-                String result = parseRequest.parse(theRequest, in);
+                JSONObject result = parseRequest.parse(theRequest, in);
                 System.out.println(result);
+                System.out.println(result.length());
+
+
                 out.println("HTTP/1.1 200 OK");
                 out.println("Server: Java HTTP Server from SSaurel : 1.0");
                 out.println("Date: " + new Date());
-                out.println("Content-type: " + "text/plain");
-                out.println("Content-length: " + result.length());
-                out.println(); // blank line between headers and content, very important !
-                out.println(result);
+                out.println("Content-type: " + "application/json");
+                out.println("Content-length: " + result.toString().length());
+                out.print("\r\n"); // blank line between headers and content, very important !
+                out.print(result + "\r\n");
                 out.flush(); // flush character output stream buffer
-
             }
 
 
