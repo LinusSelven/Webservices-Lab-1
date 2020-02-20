@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <script type="text/javascript" src="message.js"></script>
-</head>
 <body>
-<p>Welcome to JavaScript</p>
-<form>
-    <input type="button" value="click" onclick="msg()"/>
+<p>Enter name and age in the fields, then click "Submit" to submit the form:</p>
+
+<form id="frm1" action="/action_page.php">
+    First name: <input type="text" name="name"><br>
+    age: <input type="text" name="age"><br><br>
+    <input type="button" onclick="myFunction()" value="Submit">
 </form>
+
+<script>
+function myFunction() {
+  document.getElementById("frm1").submit();
+}
+</script>
 </body>
 </html>
