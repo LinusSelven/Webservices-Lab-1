@@ -1,13 +1,6 @@
+import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
@@ -16,7 +9,7 @@ import java.util.StringTokenizer;
 // The tutorial can be found just here on the SSaurel's Blog :
 // https://www.ssaurel.com/blog/create-a-simple-http-web-server-in-java
 // Each Client Connection will be managed in a dedicated Thread
-public class JavaHTTPServer implements Runnable{
+public class JavaHTTPServer implements Runnable {
 
     static final File WEB_ROOT = new File("./src/main/resources");
     static final String DEFAULT_FILE = "index.html";
@@ -61,7 +54,9 @@ public class JavaHTTPServer implements Runnable{
     @Override
     public void run() {
         // we manage our particular client connection
-        BufferedReader in = null; PrintWriter out = null; BufferedOutputStream dataOut = null;
+        BufferedReader in = null;
+        PrintWriter out = null;
+        BufferedOutputStream dataOut = null;
         String fileRequested = null;
 
         try {
@@ -72,6 +67,7 @@ public class JavaHTTPServer implements Runnable{
             // get binary output stream to client (for requested data)
             dataOut = new BufferedOutputStream(connect.getOutputStream());
 
+
             // get first line of the request from the client
             String input = in.readLine();
             // we parse the request with a string tokenizer
@@ -80,31 +76,36 @@ public class JavaHTTPServer implements Runnable{
             // we get file requested
             fileRequested = parse.nextToken().toLowerCase();
 
-            // we support only GET and HEAD methods, we check
-            if (!method.equals("GET")  &&  !method.equals("HEAD")) {
-                if (verbose) {
-                    System.out.println("501 Not Implemented : " + method + " method.");
+
+            if (method.equals("POST")) {
+                //read content to return to client
+                HTTPRequest theRequest = new HTTPRequest();
+                ParseRequest parseRequest = new ParseRequest();
+
+                JSONObject parsedResult = parseRequest.parse(theRequest, in);
+                FileWriter postBodyFromInsomnia = new FileWriter(WEB_ROOT + "/jsonTest.json");
+                try {
+                    postBodyFromInsomnia.write(parsedResult.toString());
+                    postBodyFromInsomnia.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
-                // we return the not supported file to the client
-                File file = new File(WEB_ROOT, METHOD_NOT_SUPPORTED);
+                File file = new File(WEB_ROOT, fileRequested);
                 int fileLength = (int) file.length();
-                String contentMimeType = "text/html";
-                //read content to return to client
+                String content = getContentType(fileRequested);
                 byte[] fileData = readFileData(file, fileLength);
 
-                // we send HTTP Headers with data to client
-                out.println("HTTP/1.1 501 Not Implemented");
-                out.println("Server: Java HTTP Server from SSaurel : 1.0");
-                out.println("Date: " + new Date());
-                out.println("Content-type: " + contentMimeType);
-                out.println("Content-length: " + fileLength);
-                out.println(); // blank line between headers and content, very important !
+                out.print("HTTP/1.1 200 OK" + "\r\n");
+                out.print("Server: Java HTTP Server from Linus & Måns" + "\r\n");
+                out.print("Date: " + new Date() + "\r\n");
+                out.print("Content-type: " + "application/json" + "\r\n");
+                out.print("Content-length: " + fileLength + "\r\n");
+                out.print("\r\n"); // blank line between headers and content, very important !
                 out.flush(); // flush character output stream buffer
-                // file
+
                 dataOut.write(fileData, 0, fileLength);
                 dataOut.flush();
-
             } else {
                 // GET or HEAD method
                 if (fileRequested.endsWith("/")) {
@@ -119,12 +120,12 @@ public class JavaHTTPServer implements Runnable{
                     byte[] fileData = readFileData(file, fileLength);
 
                     // send HTTP Headers
-                    out.println("HTTP/1.1 200 OK");
-                    out.println("Server: Java HTTP Server from SSaurel : 1.0");
-                    out.println("Date: " + new Date());
-                    out.println("Content-type: " + content);
-                    out.println("Content-length: " + fileLength);
-                    out.println(); // blank line between headers and content, very important !
+                    out.print("HTTP/1.1 200 OK" + "\r\n");
+                    out.print("Server: Java HTTP Server from Linus & Måns" + "\r\n");
+                    out.print("Date: " + new Date() + "\r\n");
+                    out.print("Content-type: " + content + "\r\n");
+                    out.print("Content-length: " + fileLength + "\r\n");
+                    out.print("\r\n"); // blank line between headers and content, very important !
                     out.flush(); // flush character output stream buffer
 
                     dataOut.write(fileData, 0, fileLength);
@@ -160,8 +161,6 @@ public class JavaHTTPServer implements Runnable{
                 System.out.println("Connection closed.\n");
             }
         }
-
-
     }
 
     private byte[] readFileData(File file, int fileLength) throws IOException {
@@ -181,13 +180,15 @@ public class JavaHTTPServer implements Runnable{
 
     // return supported MIME Types
     private String getContentType(String fileRequested) {
-        if (fileRequested.endsWith(".htm")  ||  fileRequested.endsWith(".html"))
+        if (fileRequested.endsWith(".htm") || fileRequested.endsWith(".html"))
             return "text/html";
         if (fileRequested.endsWith(".pdf"))
             return "application/pdf";
-        if(fileRequested.endsWith(".css"))
+        if (fileRequested.endsWith(".json"))
+            return "application/json";
+        if (fileRequested.endsWith(".css"))
             return "text/css";
-        if(fileRequested.endsWith(".png"))
+        if (fileRequested.endsWith(".png"))
             return "image/png";
         else
             return "text/plain";
@@ -199,12 +200,12 @@ public class JavaHTTPServer implements Runnable{
         String content = "text/html";
         byte[] fileData = readFileData(file, fileLength);
 
-        out.println("HTTP/1.1 404 File Not Found");
-        out.println("Server: Java HTTP Server from SSaurel : 1.0");
-        out.println("Date: " + new Date());
-        out.println("Content-type: " + content);
-        out.println("Content-length: " + fileLength);
-        out.println(); // blank line between headers and content, very important !
+        out.print("HTTP/1.1 404 File Not Found" + "\r\n");
+        out.print("Server: Java HTTP Server from Linus & Måns" + "\r\n");
+        out.print("Date: " + new Date() + "\r\n");
+        out.print("Content-type: " + content + "\r\n");
+        out.print("Content-length: " + fileLength + "\r\n");
+        out.print("\r\n"); // blank line between headers and content, very important !
         out.flush(); // flush character output stream buffer
 
         dataOut.write(fileData, 0, fileLength);
@@ -214,5 +215,4 @@ public class JavaHTTPServer implements Runnable{
             System.out.println("File " + fileRequested + " not found");
         }
     }
-
 }
