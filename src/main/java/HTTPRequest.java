@@ -6,14 +6,13 @@ import java.util.HashMap;
 
 public class HTTPRequest {
 
+    private String StartLineImplementation;
+    private String StartLineURL;
+    private String StartLineStatus;
 
-    String StartLineImplementation;
-    String StartLineURL;
-    String StartLineStatus;
+    private HashMap<String, String> headers = new HashMap<String, String>();
 
-    HashMap<String, String> headers = new HashMap<String, String>();
-
-    JsonObject body;
+    private JsonObject body;
 
     public void TheRequest() {
     }

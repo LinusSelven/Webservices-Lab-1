@@ -1,5 +1,3 @@
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -11,7 +9,6 @@ import java.util.regex.PatternSyntaxException;
 public class ParseRequest {
 
     public JSONObject parse(HTTPRequest httpRequest, BufferedReader in) throws IOException {
-        System.out.println("Parsing ---------------------");
         // Get starline
         String[] splitHead = in.readLine().split(" ");
         httpRequest.setStartLineImplementation(splitHead[0].toUpperCase());
@@ -41,8 +38,6 @@ public class ParseRequest {
 
                         final String nameValue = regexMatcher.group(2);
                         final String ageValue = regexMatcher.group(3);
-
-
 
 
                         String jsonString = "{\"name\": \""+nameValue+"\", \"age\": \""+ageValue+"\"}";
